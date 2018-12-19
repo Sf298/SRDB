@@ -210,7 +210,6 @@ public class GetterFrame {
     /**
      * initialises a plain text area
      * @param title The label to use, shows nothing if null
-     * @param scrollable if the user can scroll around the textField
      * @param quickInsert add buttons to the top to quickly insert text
      * @return [The component to add to the frame, the text field to get the text]
      */

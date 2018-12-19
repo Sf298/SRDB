@@ -1,0 +1,24 @@
+-classpath
+'C:/Users/demon/.m2/repository/org/jdom/jdom2/2.0.6/jdom2-2.0.6.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'D:/Dropbox/Java Projects/SaudsRelationalDatabase/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2018. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'D:/Dropbox/Java Projects/SaudsRelationalDatabase/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'SaudsRelationalDatabase 1.0-SNAPSHOT API'
+-linkoffline
+'https://docs.oracle.com/javase/8/docs/api' 'D:/Dropbox/Java Projects/SaudsRelationalDatabase/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'SaudsRelationalDatabase 1.0-SNAPSHOT API'
