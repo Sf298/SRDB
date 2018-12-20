@@ -10,7 +10,7 @@ import java.util.HashSet;
  * method of the RemoveColsOp class returns value returns a MyTable object.
  * @author Saud Fatayerji
  */
-public class RemoveColsOp implements TableOperationInterface {
+public class RemoveColsOp implements SequentialInterface {
     
     private MyTable outTable;
     
@@ -28,7 +28,7 @@ public class RemoveColsOp implements TableOperationInterface {
         this.oldTableTitles = oldTableTitles;
         this.titlesToRemove = titlesToRemove;
         this.idxsToRemove = intArr2Set(getColIdxsByNames(oldTableTitles, titlesToRemove));
-        this.outTable = new MyTable(newTableName, remIdxs(idxsToRemove, oldTableTitles));
+        this.outTable = new MyTable(newTableName, getNewTitles());
     }
     private static HashSet<Integer> intArr2Set(int[] arr) {
         HashSet<Integer> set = new HashSet<>();
@@ -49,7 +49,7 @@ public class RemoveColsOp implements TableOperationInterface {
 
     @Override
     public void runOp(String key, String[] row) {
-        String[] newRow = remIdxs(idxsToRemove, row);
+        String[] newRow = processRow(key, row);
         outTable.setRow(key, newRow);
     }
 
@@ -104,6 +104,16 @@ public class RemoveColsOp implements TableOperationInterface {
             colIndexes[i] = getColIdxByName(originalTitles, colTitles[i]);
         }
         return colIndexes;
+    }
+
+    @Override
+    public String[] processRow(String key, String[] row) {
+        return remIdxs(idxsToRemove, row);
+    }
+
+    @Override
+    public String[] getNewTitles() {
+        return remIdxs(idxsToRemove, oldTableTitles);
     }
     
 }

@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * CatColumnsOp class returns value returns a MyTable object.
  * @author Saud Fatayerji
  */
-public class CatColumnsOp implements TableOperationInterface {
+public final class CatColumnsOp implements SequentialInterface {
     
     private final String[] oldTableTitles;
     private final ArrayList<Integer> colsToJoin;
@@ -40,15 +40,7 @@ public class CatColumnsOp implements TableOperationInterface {
             this.colsToJoin.add(i);
         }
         
-        String[] titles = new String[oldTableTitles.length - colsToJoin.length + 1];
-        int mod = 0;
-        for(int i=0; i<titles.length-1; i++) {
-            while(this.colsToJoin.contains(i+mod)) {
-                mod++;
-            }
-            titles[i] = oldTableTitles[i+mod];
-        }
-        titles[titles.length-1] = newColName;
+        String[] titles = getNewTitles();
         table = new MyTable(newTableName, titles);
     }
 
@@ -64,24 +56,8 @@ public class CatColumnsOp implements TableOperationInterface {
 
     @Override
     public void runOp(String key, String[] row) {
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i<colsToJoin.size(); i++) {
-            if(i>0)
-                sb.append(separator);
-            sb.append(row[i]);
-        }
-        
-        String[] newRow = new String[table.getColCount()];
-        int mod = 0;
-        for(int i=0; i<newRow.length-1; i++) {
-            while(this.colsToJoin.contains(i+mod)) {
-                mod++;
-            }
-            newRow[i] = row[i+mod];
-        }
-        newRow[newRow.length-1] = sb.toString();
+        String[] newRow = processRow(key, row);
         table.setRow(key, newRow);
-        
     }
 
     @Override
@@ -101,6 +77,41 @@ public class CatColumnsOp implements TableOperationInterface {
         CatColumnsOp out = new CatColumnsOp(table.getTableName(), newColName, separator, oldTableTitles, tempArr);
         out.table = new MyTable(table);
         return out;
+    }
+
+    @Override
+    public String[] processRow(String key, String[] row) {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<colsToJoin.size(); i++) {
+            if(i>0)
+                sb.append(separator);
+            sb.append(row[i]);
+        }
+        
+        String[] newRow = new String[table.getColCount()];
+        int mod = 0;
+        for(int i=0; i<newRow.length-1; i++) {
+            while(this.colsToJoin.contains(i+mod)) {
+                mod++;
+            }
+            newRow[i] = row[i+mod];
+        }
+        newRow[newRow.length-1] = sb.toString();
+        return newRow;
+    }
+
+    @Override
+    public String[] getNewTitles() {
+        String[] titles = new String[oldTableTitles.length - colsToJoin.size() + 1];
+        int mod = 0;
+        for(int i=0; i<titles.length-1; i++) {
+            while(this.colsToJoin.contains(i+mod)) {
+                mod++;
+            }
+            titles[i] = oldTableTitles[i+mod];
+        }
+        titles[titles.length-1] = newColName;
+        return titles;
     }
     
 }

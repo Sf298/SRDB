@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * JoinTableOp class returns value returns a MyTable object.
  * @author Saud Fatayerji
  */
-public class JoinTableOp implements TableOperationInterface {
+public class JoinTableOp implements SequentialInterface {
     
     private final String refColTitle;
     private final MyTable pkTable;
@@ -31,16 +31,8 @@ public class JoinTableOp implements TableOperationInterface {
         this.refColTitle = refColTitle;
         this.colToRemove = rkTable.getColIdxByName(refColTitle);
         
-        ArrayList<String> newTitles = new ArrayList<>();
-        for(int i=0; i<rkTable.getColTitles().length; i++) {
-            newTitles.add(rkTable.getTableName()+"."+rkTable.getColTitle(i));
-        }
-        for(int i=0; i<pkTable.getColTitles().length; i++) {
-            newTitles.add(pkTable.getTableName()+"."+pkTable.getColTitle(i));
-        }
-        newTitles.remove(colToRemove);
         
-        this.outTable = new MyTable(newTableName, newTitles.toArray(new String[newTitles.size()]));
+        this.outTable = new MyTable(newTableName, getNewTitles());
     }
 
     @Override
@@ -55,21 +47,7 @@ public class JoinTableOp implements TableOperationInterface {
 
     @Override
     public void runOp(String key, String[] row) {
-        String[] newRow = new String[outTable.getColCount()];
-        int i=0;
-        for(; i<colToRemove; i++) {
-            newRow[i] = row[i];
-        }
-        i++;
-        for(; i<rkTable.getColCount(); i++) {
-            newRow[i-1] = row[i];
-        }
-        String[] pkRow = pkTable.getRow(row[colToRemove]);
-        i--;
-        for(; i<newRow.length; i++) {
-            int temp = i-(rkTable.getColCount()-1);
-            newRow[i] = pkRow[temp];
-        }
+        String[] newRow = processRow(key, row);
         outTable.setRow(key, newRow);
         /*String[] newRow = new String[outTable.getColCount()];
         String[] refRow = null;
@@ -98,6 +76,39 @@ public class JoinTableOp implements TableOperationInterface {
         JoinTableOp out = new JoinTableOp(outTable.getTableName(), refColTitle, pkTable, rkTable);
         out.outTable = new MyTable(outTable);
         return out;
+    }
+
+    @Override
+    public String[] processRow(String key, String[] row) {
+        String[] newRow = new String[outTable.getColCount()];
+        int i=0;
+        for(; i<colToRemove; i++) {
+            newRow[i] = row[i];
+        }
+        i++;
+        for(; i<rkTable.getColCount(); i++) {
+            newRow[i-1] = row[i];
+        }
+        String[] pkRow = pkTable.getRow(row[colToRemove]);
+        i--;
+        for(; i<newRow.length; i++) {
+            int temp = i-(rkTable.getColCount()-1);
+            newRow[i] = pkRow[temp];
+        }
+        return newRow;
+    }
+
+    @Override
+    public String[] getNewTitles() {
+        ArrayList<String> newTitles = new ArrayList<>();
+        for(int i=0; i<rkTable.getColTitles().length; i++) {
+            newTitles.add(rkTable.getTableName()+"."+rkTable.getColTitle(i));
+        }
+        for(int i=0; i<pkTable.getColTitles().length; i++) {
+            newTitles.add(pkTable.getTableName()+"."+pkTable.getColTitle(i));
+        }
+        newTitles.remove(colToRemove);
+        return newTitles.toArray(new String[newTitles.size()]);
     }
     
 }

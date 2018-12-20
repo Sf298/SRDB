@@ -1012,6 +1012,45 @@ public class MyTable {
      * @return An array of all the results from the given ops as returned by the
      * TableOperationInterface.getOpsArrResults() method.
      */
+    public MyTable runOpsSequentially(String newTableName, boolean parse, int threadCount, SequentialInterface... ops) {
+        if(threadCount == -1)
+            threadCount = Runtime.getRuntime().availableProcessors();
+        //System.out.println("tc: "+threadCount);
+        
+        MyTable out = new MyTable(newTableName, ops[ops.length-1].getNewTitles());
+        
+        HashMap<String, String[]>[] rows = MPT.split(threadCount, content);
+        MyTable.SeqProcThread[] procs = new SeqProcThread[threadCount];
+        Thread[] threads = new Thread[threadCount];
+        for(int i=0; i<threadCount; i++) {
+            SequentialInterface[] temp = SequentialInterface.copyOpsArr(ops);
+            MyTable.SeqProcThread p = new SeqProcThread(parse, rows[i], out, temp);
+            Thread t = new Thread(p);
+            procs[i] = p;
+            threads[i] = t;
+            t.start();
+        }
+        for(int i=0; i<procs.length; i++) {
+            try {
+                threads[i].join();
+            } catch (InterruptedException ex) {}
+            out.getRows().putAll(procs[i].getTable().getRows());
+        }
+        return out;
+    }
+    
+    /**
+     * Runs all provided ops on each of the rows in the table. Can be
+     * multi-threaded.
+     * @param parse If the rows should be parsed before being passed to the
+     * TableOperationInterface.runOp() methods. Note: refer to the parseRow()
+     * method for more information on parsing.
+     * @param threadCount The number of threads to use for this operation. Set
+     * this to -1 to set the number automatically.
+     * @param ops The operations to run on the provided rows.
+     * @return An array of all the results from the given ops as returned by the
+     * TableOperationInterface.getOpsArrResults() method.
+     */
     public Object[] runOps(boolean parse, int threadCount, TableOperationInterface... ops) {
         if(threadCount == -1)
             threadCount = Runtime.getRuntime().availableProcessors();
@@ -1478,6 +1517,57 @@ public class MyTable {
                     op.runOp(entry.getKey(), value);
                 }
             }
+        }
+        
+    }
+    
+    /**
+     * The thread used for multiprocessing by the runOp method.
+     */
+    private class SeqProcThread implements Runnable {
+        
+        private boolean parse;
+        private SequentialInterface[] ops;
+        private HashMap<String, String[]> rows;
+        private MyTable table;
+        
+        /**
+         * Creates a new ProcThread that runs the provided operations.
+         * @param parse If the rows should be parsed before being passed to the
+         * TableOperationInterface.runOp() methods. Note: refer to the parseRow()
+         * method for more information on parsing.
+         * @param rows The rows to pass on to the TableOperationInterface.runOp()
+         * methods.
+         * @param ops The operations to run on the provided rows.
+         */
+        public SeqProcThread(boolean parse, HashMap<String, String[]> rows, MyTable resultTable, SequentialInterface... ops) {
+            this.parse = parse;
+            this.rows = rows;
+            this.ops = ops;
+            table = new MyTable(resultTable);
+        }
+        
+        /**
+         * Runs all ops on each of the provided rows.
+         */
+        @Override
+        public void run() {
+            for(Map.Entry<String, String[]> entry : rows.entrySet()) {
+                String key = entry.getKey();
+                String[] value = entry.getValue();
+                if(parse) {
+                    value = getParsedRow(entry.getKey());
+                }
+                String[] newRow = value;
+                for(int i=0; i<ops.length; i++) {
+                    newRow = ops[i].processRow(key, newRow);
+                }
+                table.setRow(key, newRow);
+            }
+        }
+        
+        public MyTable getTable() {
+            return table;
         }
         
     }

@@ -11,7 +11,7 @@ import databasepackage.MyTable;
  * object.
  * @author Saud Fatayerji
  */
-public class FilterOp implements TableOperationInterface {
+public final class FilterOp implements SequentialInterface {
     
     private final Filter<String, String[]> filter;
     
@@ -29,7 +29,7 @@ public class FilterOp implements TableOperationInterface {
         this.filter = f;
         this.newTableName = newTableName;
         this.titles = titles;
-        this.outTable = new MyTable(newTableName, titles);
+        this.outTable = new MyTable(newTableName, getNewTitles());
     }
 
     @Override
@@ -44,7 +44,8 @@ public class FilterOp implements TableOperationInterface {
 
     @Override
     public void runOp(String key, String[] row) {
-        if(filter.shouldKeep(key, row))
+        String[] newRow = processRow(key, row);
+        if(newRow != null)
             outTable.setRow(key, row);
     }
 
@@ -61,6 +62,19 @@ public class FilterOp implements TableOperationInterface {
         FilterOp out = new FilterOp(newTableName, titles, filter);
         out.outTable = new MyTable(outTable);
         return out;
+    }
+
+    @Override
+    public String[] processRow(String key, String[] row) {
+        if(filter.shouldKeep(key, row))
+            return row;
+        else
+            return null;
+    }
+
+    @Override
+    public String[] getNewTitles() {
+        return titles;
     }
     
 }

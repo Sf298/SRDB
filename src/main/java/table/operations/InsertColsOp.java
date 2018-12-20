@@ -14,7 +14,7 @@ import java.util.HashSet;
  * object.
  * @author Saud Fatayerji
  */
-public class InsertColsOp implements TableOperationInterface {
+public final class InsertColsOp implements SequentialInterface {
     
     private MyTable outTable;
     
@@ -46,8 +46,7 @@ public class InsertColsOp implements TableOperationInterface {
         this.newColTitles = newColTitles;
         this.defaultValues = defaultValues;
         
-        String[] cols2Add = (columns==null) ? newColTitles : columns.getColTitles();
-        this.outTable = new MyTable(newTableName, insertCols(oldTitles, positions, cols2Add));
+        this.outTable = new MyTable(newTableName, getNewTitles());
     }
     
     /**
@@ -109,11 +108,7 @@ public class InsertColsOp implements TableOperationInterface {
 
     @Override
     public void runOp(String key, String[] row) {
-        String[] newRow;
-        if(defaultValues != null)
-            newRow = insertCols(row, poss, defaultValues);
-        else
-            newRow = insertCols(row, poss, columns.getRow(key));
+        String[] newRow = processRow(key, row);
         outTable.setRow(key, newRow);
     }
 
@@ -161,6 +156,20 @@ public class InsertColsOp implements TableOperationInterface {
         for(int i : arr)
             set.add(i);
         return set;
+    }
+
+    @Override
+    public String[] processRow(String key, String[] row) {
+        if(defaultValues != null)
+            return insertCols(row, poss, defaultValues);
+        else
+            return insertCols(row, poss, columns.getRow(key));
+    }
+
+    @Override
+    public String[] getNewTitles() {
+        String[] cols2Add = (columns==null) ? newColTitles : columns.getColTitles();
+        return insertCols(oldTitles, poss, cols2Add);
     }
     
 }

@@ -12,7 +12,7 @@ import java.util.Map;
  * of the SelectColsOp class returns value returns a MyTable object.
  * @author Saud Fatayerji
  */
-public class SelectColsOp implements TableOperationInterface {
+public class SelectColsOp implements SequentialInterface {
     
     private HashMap<String, String[]> map = new HashMap<>();
     
@@ -46,10 +46,7 @@ public class SelectColsOp implements TableOperationInterface {
 
     @Override
     public void runOp(String key, String[] row) {
-        String[] newRow = new String[colIdxs.length];
-        for(int i=0; i<colIdxs.length; i++) {
-            newRow[i] = row[colIdxs[i]];
-        }
+        String[] newRow = processRow(key, row);
         map.put(key, newRow);
     }
 
@@ -70,6 +67,20 @@ public class SelectColsOp implements TableOperationInterface {
             out.map.put(key, Arrays.copyOf(value, value.length));
         }
         return out;
+    }
+
+    @Override
+    public String[] processRow(String key, String[] row) {
+        String[] newRow = new String[colIdxs.length];
+        for(int i=0; i<colIdxs.length; i++) {
+            newRow[i] = row[colIdxs[i]];
+        }
+        return newRow;
+    }
+
+    @Override
+    public String[] getNewTitles() {
+        return colTitles;
     }
     
 }

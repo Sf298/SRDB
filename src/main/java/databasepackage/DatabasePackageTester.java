@@ -5,7 +5,11 @@
  */
 package databasepackage;
 
+import imported.SampleDataGen;
 import imported.Timer;
+import table.operations.CatColumnsOp;
+import table.operations.InsertColsOp;
+import table.operations.RemoveColsOp;
 
 /**
  *
@@ -14,6 +18,9 @@ import imported.Timer;
 public class DatabasePackageTester {
     
     public static void main(String[] args) throws CloneNotSupportedException {
+        seqOpsSpeedTest();
+    }
+    public static void oldTests() {
         MyTable people = new MyTable("People", new String[] {"First Name", "Last Name", "Phone Number"});
         people.addRow("saud", "f", "0552039784");
         people.addRow("sult", "b", "00000000");
@@ -73,8 +80,8 @@ public class DatabasePackageTester {
             Logger.getLogger(DatabasePackageTester.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println(result);*/
-        
     }
+    
     public static void generalTests(MyTable people, MyTable horses, MyTable appointments) {
         System.out.println(people.catColumns("Name", " ", "First Name", "Last Name").toString());
         System.out.println(horses.toString());
@@ -99,5 +106,45 @@ public class DatabasePackageTester {
         //System.out.println(t.avgColumn("Amount"));
     }
     
+    public static void seqOpsSpeedTest() {
+        SampleDataGen.setSeed(648764);
+        MyTable table = new MyTable("People", new String[] {"First Name", "Last Name", "Phone Num", "Email"});
+        int personCount = 200000;
+        int horseCount =  100000;
+        for(int i=0; i<personCount; i++) {
+            table.addRow(
+                    SampleDataGen.randWord(), SampleDataGen.randWord(),
+                    SampleDataGen.randInt(100000000, 999999999)+"", SampleDataGen.randEmail());
+        }
+        MyTable table2 = new MyTable("Horses", new String[] {"Owner", "Name"});
+        for(int i=0; i<horseCount; i++) {
+            table2.addRow(SampleDataGen.randInt(0, personCount-1)+"", SampleDataGen.randWord());
+        }
+        
+        
+        String newTableName = "TEMP1";
+        String[] selectedCols = {"First Name", "Last Name"};
+        
+        String[] newTitles = new String[] {"new_col1", "new_col2"};
+        int[] newPositions = new int[] {-1, -1};
+        String[] newDefVals = new String[] {"COL1!", "COL2!"};
+        
+        Timer t1 = new Timer("Seq timer");
+        for (int i = 0; i < 50; i++) {
+            CatColumnsOp op1 = table.getCatColumnsOp(newTableName, "Name", " ", selectedCols);
+            InsertColsOp op2 = op1.getResult().getInsertColsOp(newTableName, newPositions, newTitles, newDefVals);
+            RemoveColsOp op3 = op2.getResult().getRemoveColsOp(newTableName, "Email");
+            MyTable actual = table.runOpsSequentially(newTableName, true, 4, op1, op2, op3);
+        }
+        t1.print();
+        
+        Timer t2 = new Timer("Old timer");
+        for (int i = 0; i < 50; i++) {
+            MyTable expected = (MyTable) table.runOp(true, 4, table.getCatColumnsOp(newTableName, "Name", " ", selectedCols));
+            expected = (MyTable) expected.runOp(true, 4, expected.getInsertColsOp(newTableName, newPositions, newTitles, newDefVals));
+            expected = (MyTable) expected.runOp(true, 4, expected.getRemoveColsOp(newTableName, "Email"));
+        }
+        t2.print();
+    }
     
 }

@@ -15,6 +15,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import table.operations.CatColumnsOp;
+import table.operations.InsertColsOp;
+import table.operations.RemoveColsOp;
 
 /**
  *
@@ -61,6 +64,30 @@ public class MyTableTest {
 
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
+    
+    @Test
+    public void testSequential() {
+        String newTableName = "TEMP1";
+        String[] selectedCols = {"First Name", "Last Name"};
+        
+        String[] newTitles = new String[] {"new_col1", "new_col2"};
+        int[] newPositions = new int[] {-1, -1};
+        String[] newDefVals = new String[] {"COL1!", "COL2!"};
+        
+        CatColumnsOp op1 = table.getCatColumnsOp(newTableName, "Name", " ", selectedCols);
+        InsertColsOp op2 = op1.getResult().getInsertColsOp(newTableName, newPositions, newTitles, newDefVals);
+        RemoveColsOp op3 = op2.getResult().getRemoveColsOp(newTableName, "Email");
+        MyTable actual = table.runOpsSequentially(newTableName, true, 4, op1, op2, op3);
+        
+        
+        MyTable expected = (MyTable) table.runOp(true, 4, table.getCatColumnsOp(newTableName, "Name", " ", selectedCols));
+        expected = (MyTable) expected.runOp(true, 4, expected.getInsertColsOp(newTableName, newPositions, newTitles, newDefVals));
+        expected = (MyTable) expected.runOp(true, 4, expected.getRemoveColsOp(newTableName, "Email"));
+        
+        boolean out = actual.equals(expected);
+        assertTrue(out);
+    }
+    
     
     @Test
     public void testFilterOp() {
