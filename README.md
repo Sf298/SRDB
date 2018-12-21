@@ -44,7 +44,7 @@ Object[] results = table.runOp(true, -1, uniqueOp, sumOp);
 ~~~~
 
 ### Sequential Operations
-Often a table will need to be passed through one operation before it can be passed into the next. For these purposes, the runOpsSequentially() method was created. Using this function rather than a series of calls to runOp() can dramatically improve performance of the program. The code below assumes that there is are 'Pet', 'Appointment', and 'People' tables. It will find any records where a client owes money.
+Often a table will need to be passed through one operation before it can be passed into the next. For these purposes, the runOpsSequentially() method was created. Using this function rather than a series of calls to runOp() can dramatically improve performance of the program. The code below assumes that there is are 'Pets', 'Appointment', and 'People' tables. It will find any records where a client owes money.
 ~~~~
 JoinTableOp op1 = appointmentsT.getJoinTableOp("", "Pet", petT);
 JoinTableOp op2 = op1.getResult().getJoinTableOp("", "Pet.Owner", personT);
@@ -52,4 +52,27 @@ TrimColTitlesOp op3 = op2.getResult().getTrimColTitlesOp("");
 SelectColsOp op4 = op3.getResult().getSelectColsOp("", "Amount", "Payment", "Balance", "First Name", "Last Name");
 CatColumnsOp op5 = op4.getResult().getCatColumnsOp("", "Name", " ", "First Name", "Last Name");
 MyTable table = appointmentsT.runOpsSequentially("Money Owed", true, -1, op1, op2, op3, op4, op5);
+~~~~
+
+### Saving and Loading
+Tables can be saved and loaded in XML format using the appropriate static functions of the MyTable class. Multiple tables can be saved to one file, however each call to the saveTables method overwrites the contents of the file.
+~~~~
+// save
+MyTable.saveTables(file, personT, horseT, appointmentsT);
+
+// load
+HashMap<String, MyTable> tables = MyTable.loadTables(HorseDBMain.dbSaveFile);
+if(tables != null) {
+    personT = tables.get("People");
+    petT = tables.get("Pets");
+    appointmentsT = tables.get("Appointments");
+}
+~~~~
+
+
+### Table Viewer
+The MyTableViewer class provides a simple tool for allowing users to view and edit tables. It can be loaded in two ways, editable or not editable. When not editable, the buttons used to edit the table are hidden, however other features like search and apply function are still available. If a parentFrame is provided, it will be hidden while the table viewer is visible.
+~~~~
+MyTableViewer viewer = new MyTableViewer(table, isEditable, parentFrame);
+viewer.openViewer();
 ~~~~
