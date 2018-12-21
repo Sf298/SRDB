@@ -28,7 +28,7 @@ Additionally you can set the content of a specific cell with the setCellValue() 
 Rows are deleted with the removeRow() function.
 
 ### Parallel Operations
-The MyTable class supports a system to perform batch operations on the content of a table. While users can create custom operations by implementing the 'TableOperationInterface' or 'SequentialInterface' iterfaces, there are a number of predefined operations. These can be accessed as shown below.
+The MyTable class supports a system to perform batch operations on the content of a table. While users can create custom operations by implementing the 'TableOperationInterface' or 'SequentialInterface' iterfaces, there are a number of predefined operations (listed below). These can be accessed as shown below.
 ~~~~
 UniqueOp uniqueOp = table.getUniqueOp(selectedColTitle);
 SumOp sumOp = table.getSumOp(selectedColTitle);
@@ -53,6 +53,23 @@ SelectColsOp op4 = op3.getResult().getSelectColsOp("", "Amount", "Payment", "Bal
 CatColumnsOp op5 = op4.getResult().getCatColumnsOp("", "Name", " ", "First Name", "Last Name");
 MyTable table = appointmentsT.runOpsSequentially("Money Owed", true, -1, op1, op2, op3, op4, op5);
 ~~~~
+
+### Available Operations
+Summary operations
+* Avg (mean)
+* UniqueOp
+* SumOp
+* AvgMeanOp
+* GroupOps
+
+Table operations
+* CatColumnsOp
+* FilterOp
+* InsertColsOp
+* SelectColsOp
+* RemoveColsOp
+* JoinTableOp
+* TrimColTitlesOp
 
 ### Saving and Loading
 Tables can be saved and loaded in XML format using the appropriate static functions of the MyTable class. Multiple tables can be saved to one file, however each call to the saveTables method overwrites the contents of the file.
