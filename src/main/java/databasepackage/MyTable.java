@@ -212,6 +212,26 @@ public class MyTable {
         int colIdx = getColIdxByName(colTitle);
         return getCellValue(colIdx, recordId);
     }
+    /**
+     * Sets the value stored in the cell at the specified column and row.
+     * @param colIdx The index of the column.
+     * @param recordId The primary key of the row.
+     * @param value The new value of the cell.
+     */
+    public void setCellValue(int colIdx, String recordId, String value) {
+        getRow(recordId)[colIdx] = value;
+    }
+    
+    /**
+     * Sets the value stored in the cell at the specified column and row.
+     * @param colTitle The title of the column.
+     * @param recordId The primary key of the row.
+     * @param value The new value of the cell.
+     */
+    public void setCellValue(String colTitle, String recordId, String value) {
+        int colIdx = getColIdxByName(colTitle);
+        setCellValue(colIdx, recordId, value);
+    }
     
     
     /**
@@ -902,7 +922,7 @@ public class MyTable {
      * the returned value returns a Double object. The results of the returned 
      * operation must be calculated using the runOp() method.
      */
-    public AvgMeanOp getAvgOp(String colTitle) {
+    public AvgMeanOp getAvgMeanOp(String colTitle) {
         int colIndex = getColIdxByName(colTitle);
         AvgMeanOp out = new AvgMeanOp(colTitle, colIndex);
         return out;

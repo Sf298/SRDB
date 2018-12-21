@@ -4,9 +4,7 @@
  * and open the template in the editor.
  */
 
-import databasepackage.Filter;
 import databasepackage.MyTable;
-import databasepackage.MyTableViewer;
 import imported.SampleDataGen;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,8 +20,6 @@ import table.operations.FilterOp;
 import table.operations.InsertColsOp;
 import table.operations.JoinTableOp;
 import table.operations.RemoveColsOp;
-import table.operations.SelectColsOp;
-import table.operations.TableOperationInterface;
 
 /**
  *
@@ -267,7 +263,7 @@ public class MyTableTest {
     @Test
     public void testAvgOp() {
         String selectedCol = "Phone Num";
-        Double actual = (Double) table.runOp(true, 4, table.getAvgOp(selectedCol));
+        Double actual = (Double) table.runOp(true, 4, table.getAvgMeanOp(selectedCol));
         
         double sum = 0;
         int count = 0;
@@ -286,7 +282,7 @@ public class MyTableTest {
         
         
         selectedCol = "First Name";
-        actual = (Double) table.runOp(true, 4, table.getAvgOp(selectedCol));
+        actual = (Double) table.runOp(true, 4, table.getAvgMeanOp(selectedCol));
         System.out.println("testAvgOp-2: exp("+expected+"), act("+actual+")");
         assertEquals(new Double(0), actual);
     }

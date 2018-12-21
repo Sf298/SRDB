@@ -280,7 +280,7 @@ public class MyTableViewer extends JFrame {
                     ops.add(t.getSumOp(title));
                     break;
                 case "Average": 
-                    ops.add(t.getAvgOp(title));
+                    ops.add(t.getAvgMeanOp(title));
                     break;
                 case "Unique": 
                     ops.add(t.getUniqueOp(title));
