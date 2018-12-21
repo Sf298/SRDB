@@ -1003,6 +1003,7 @@ public class MyTable {
     /**
      * Runs all provided ops on each of the rows in the table. Can be
      * multi-threaded.
+     * @param newTableName The name for the new table.
      * @param parse If the rows should be parsed before being passed to the
      * TableOperationInterface.runOp() methods. Note: refer to the parseRow()
      * method for more information on parsing.
@@ -1480,7 +1481,7 @@ public class MyTable {
     
     
     /**
-     * The thread used for multiprocessing by the runOp method.
+     * The thread used for multiprocessing by the runOps() method.
      */
     private class ProcThread implements Runnable {
         
@@ -1522,7 +1523,8 @@ public class MyTable {
     }
     
     /**
-     * The thread used for multiprocessing by the runOp method.
+     * The thread used for multiprocessing sequential operations by the
+     * runOpsSequentially() method.
      */
     private class SeqProcThread implements Runnable {
         
@@ -1532,12 +1534,14 @@ public class MyTable {
         private MyTable table;
         
         /**
-         * Creates a new ProcThread that runs the provided operations.
+         * Creates a new SeqProcThread that runs the provided operations.
          * @param parse If the rows should be parsed before being passed to the
          * TableOperationInterface.runOp() methods. Note: refer to the parseRow()
          * method for more information on parsing.
          * @param rows The rows to pass on to the TableOperationInterface.runOp()
          * methods.
+         * @param resultTable The table to add the results to. A copy will be
+         * created, use getTable() to get the results.
          * @param ops The operations to run on the provided rows.
          */
         public SeqProcThread(boolean parse, HashMap<String, String[]> rows, MyTable resultTable, SequentialInterface... ops) {
@@ -1548,7 +1552,7 @@ public class MyTable {
         }
         
         /**
-         * Runs all ops on each of the provided rows.
+         * Runs all sequential ops on each of the provided rows.
          */
         @Override
         public void run() {
@@ -1562,7 +1566,8 @@ public class MyTable {
                 for(int i=0; i<ops.length; i++) {
                     newRow = ops[i].processRow(key, newRow);
                 }
-                table.setRow(key, newRow);
+                if(newRow!=null)
+                    table.setRow(key, newRow);
             }
         }
         

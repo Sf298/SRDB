@@ -3,7 +3,7 @@ package table.operations;
 
 /**
  * This interface allows users to create new operations for the MyTable.runOp
- * function.
+ * method.
  * @author Saud Fatayerji
  */
 public interface TableOperationInterface {
