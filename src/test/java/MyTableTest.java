@@ -4,7 +4,9 @@
  * and open the template in the editor.
  */
 
+import databasepackage.Filter;
 import databasepackage.MyTable;
+import databasepackage.MyTableViewer;
 import imported.SampleDataGen;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +18,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import table.operations.CatColumnsOp;
+import table.operations.FilterOp;
 import table.operations.InsertColsOp;
+import table.operations.JoinTableOp;
 import table.operations.RemoveColsOp;
+import table.operations.SelectColsOp;
+import table.operations.TableOperationInterface;
 
 /**
  *
@@ -30,19 +36,19 @@ public class MyTableTest {
     
     public MyTableTest() {
         SampleDataGen.setSeed(648764);
-        table = new MyTable("People", new String[] {"First Name", "Last Name", "Phone Num", "Email"});
+        table = new MyTable("People", new String[] {"First Name", "Phone Num", "Last Name", "Email"});
         int personCount = 20000;
         int horseCount =  10000;
         for(int i=0; i<personCount; i++) {
             table.addRow(
-                    SampleDataGen.randWord(), SampleDataGen.randWord(),
-                    SampleDataGen.randInt(100000000, 999999999)+"", SampleDataGen.randEmail());
+                    SampleDataGen.randWord(), SampleDataGen.randInt(100000000, 999999999)+"",
+                    SampleDataGen.randWord(), SampleDataGen.randEmail());
         }
         
 
         table2 = new MyTable("Horses", new String[] {"Owner", "Name"});
         for(int i=0; i<horseCount; i++) {
-            table2.addRow(SampleDataGen.randInt(0, personCount-1)+"", SampleDataGen.randWord());
+            table2.addRow(SampleDataGen.randInt(0, personCount*2)+"", SampleDataGen.randWord());
         }
     }
     
@@ -93,11 +99,16 @@ public class MyTableTest {
     public void testFilterOp() {
         String selectedCol = "First Name";
         String selectedVal = table.getCellValue(selectedCol, "1");
-        MyTable actual = (MyTable) table.runOp(true, 4, table.getFilterOp(selectedCol, selectedVal));
+        FilterOp op = table.getFilterOp(selectedCol, selectedVal);
         
+        MyTable actual = (MyTable) table.runOp(true, 4, op);
         MyTable expected = table.filterRows(selectedCol, selectedVal);
+        boolean out = actual.equals(expected);
+        assertTrue(out);
         
-        assertEquals(expected, actual);
+        actual = (MyTable) table.runOpsSequentially("People", true, -1, op);
+        out = actual.equals(expected);
+        assertTrue(out);
     }
     
     @Test
@@ -121,6 +132,14 @@ public class MyTableTest {
         expected = expected.join(newTableName, refColTitle, table);
         
         boolean out = actual.equals(expected);
+        assertTrue(out);
+        
+        
+        
+        JoinTableOp op1 = table2.getJoinTableOp(newTableName, refColTitle, table);
+        actual = table2.runOpsSequentially(newTableName, true, -1, op1);
+
+        out = actual.equals(expected);
         assertTrue(out);
     }
     

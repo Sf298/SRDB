@@ -686,7 +686,8 @@ public class MyTable {
                     newRow[j] = refRow[j-titles.length];
                 }
             }
-            out.setRow(entry.getKey(), newRow);
+            if(refRow!=null)
+                out.setRow(entry.getKey(), newRow);
         }
         out.removeColumn(name+"."+refColName);
         return out;
@@ -914,11 +915,25 @@ public class MyTable {
      * @param refColTitle The title of the reference column in the reference table.
      * @param pkTable The table containing the primary key.
      * @return The new new AvgMeanOp. The AvgMeanOp.getResult() method of 
-     * the returned value returns a Double object. The results of the returned 
+     * the returned value returns a MyTable object. The results of the returned 
      * operation must be calculated using the runOp() method.
      */
     public JoinTableOp getJoinTableOp(String newTableName, String refColTitle, MyTable pkTable) {
         JoinTableOp out = new JoinTableOp(newTableName, refColTitle, pkTable, this);
+        return out;
+    }
+    
+    /**
+     * The join operation changes the column names to the format
+     * "Table_name.column_name". This method strips away any table names leaving
+     * only the column names
+     * @param newTableName The name for the new table.
+     * @return The new new TrimColTitlesOp. The TrimColTitlesOp.getResult()
+     * method of the returned value returns a MyTable object. The results of the
+     * returned operation must be calculated using the runOp() method.
+     */
+    public TrimColTitlesOp getTrimColTitlesOp(String newTableName) {
+        TrimColTitlesOp out = new TrimColTitlesOp(newTableName, getColTitles());
         return out;
     }
     
@@ -1358,7 +1373,9 @@ public class MyTable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getTableName()).append(", ").append(getRowCount()).append("\n");
+        sb.append(getTableName()).append(", ")
+                .append(getRowCount()).append(" rows, ")
+                .append(getColCount()).append(" cols\n");
         sb.append("ID").append("\t\t");
         for(String title : titles) {
             sb.append(title).append("\t\t");
@@ -1564,6 +1581,7 @@ public class MyTable {
                 }
                 String[] newRow = value;
                 for(int i=0; i<ops.length; i++) {
+                    if(newRow==null) break;
                     newRow = ops[i].processRow(key, newRow);
                 }
                 if(newRow!=null)

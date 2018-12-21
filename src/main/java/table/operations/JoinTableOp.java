@@ -48,7 +48,8 @@ public class JoinTableOp implements SequentialInterface {
     @Override
     public void runOp(String key, String[] row) {
         String[] newRow = processRow(key, row);
-        outTable.setRow(key, newRow);
+        if(newRow!=null)
+            outTable.setRow(key, newRow);
         /*String[] newRow = new String[outTable.getColCount()];
         String[] refRow = null;
         for(int j=0; j<newRow.length; j++) {
@@ -90,6 +91,8 @@ public class JoinTableOp implements SequentialInterface {
             newRow[i-1] = row[i];
         }
         String[] pkRow = pkTable.getRow(row[colToRemove]);
+        if(pkRow == null)
+            return null;
         i--;
         for(; i<newRow.length; i++) {
             int temp = i-(rkTable.getColCount()-1);

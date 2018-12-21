@@ -85,7 +85,7 @@ public final class CatColumnsOp implements SequentialInterface {
         for(int i=0; i<colsToJoin.size(); i++) {
             if(i>0)
                 sb.append(separator);
-            sb.append(row[i]);
+            sb.append(row[colsToJoin.get(i)]);
         }
         
         String[] newRow = new String[table.getColCount()];
